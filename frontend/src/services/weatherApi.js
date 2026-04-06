@@ -1,8 +1,8 @@
 export async function fetchWeather(lat, lon) {
   try {
     const res = await fetch(
-  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,precipitation,visibility,windspeed_10m,uv_index`
-);
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,precipitation,visibility,windspeed_10m,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=auto`
+  );
 
     const data = await res.json();
     return data;

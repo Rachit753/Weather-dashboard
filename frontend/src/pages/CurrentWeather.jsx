@@ -19,19 +19,26 @@ function CurrentWeather() {
   };
 
   const currentIndex = weather?.hourly?.time?.findIndex(
-  (t) => new Date(t).getHours() === new Date().getHours()
+    (t) => new Date(t).getHours() === new Date().getHours()
   );
   const index = currentIndex !== -1 ? currentIndex : 0;
-  
-  const currentTemp = convertTemp( weather?.hourly?.temperature_2m?.[index]);
 
+  const currentTemp = convertTemp(weather?.hourly?.temperature_2m?.[index]);
   const humidity = weather?.hourly?.relativehumidity_2m?.[index];
-
   const precipitation = weather?.hourly?.precipitation?.[index];
-
   const windSpeed = weather?.hourly?.windspeed_10m?.[index];
-
   const uvIndex = weather?.hourly?.uv_index?.[index];
+
+  const sunrise = weather?.daily?.sunrise?.[0];
+  const sunset = weather?.daily?.sunset?.[0];
+
+  const formatTime = (time) =>
+    time
+      ? new Date(time).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "--";
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -94,6 +101,16 @@ function CurrentWeather() {
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
             <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
             <WeatherCard title="UV Index" value={uvIndex} unit="" />
+            <WeatherCard
+              title="Sunrise"
+              value={formatTime(sunrise)}
+              unit=""
+            />
+            <WeatherCard
+              title="Sunset"
+              value={formatTime(sunset)}
+              unit=""
+            />
           </div>
 
           <div className="space-y-8">
@@ -112,7 +129,7 @@ function CurrentWeather() {
               dataKey="precipitation"
               title="Precipitation (mm)"
             />
-            
+
             <WeatherChart
               data={chartData}
               dataKey="wind"
