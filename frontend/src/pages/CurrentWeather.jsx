@@ -43,6 +43,19 @@ function CurrentWeather() {
         })
       : "--";
 
+  const pm25 = airData?.hourly?.pm2_5?.[index];
+
+  const getAQI = (pm) => {
+    if (pm == null) return { value: "--", label: "Unknown" };
+
+    if (pm <= 12) return { value: pm, label: "Good" };
+    if (pm <= 35) return { value: pm, label: "Moderate" };
+    if (pm <= 55) return { value: pm, label: "Unhealthy" };
+    return { value: pm, label: "Very Unhealthy" };
+  };
+
+  const aqi = getAQI(pm25);
+
   useEffect(() => {
     if (latitude && longitude) {
       fetchWeather(latitude, longitude).then(setWeather);
@@ -100,6 +113,7 @@ function CurrentWeather() {
               value={currentTemp?.toFixed(1)}
               unit={`°${unit}`}
             />
+
             <div className="bg-gray-800 p-4 rounded-xl">
               <p className="text-gray-400 text-sm mb-2">Temperature Range</p>
               <div className="flex justify-between items-center">
@@ -117,10 +131,18 @@ function CurrentWeather() {
                 </div>
               </div>
             </div>
+
             <WeatherCard title="Humidity" value={humidity} unit="%" />
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
             <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
             <WeatherCard title="UV Index" value={uvIndex} unit="" />
+
+            <WeatherCard
+              title="Air Quality"
+              value={`${aqi.value}`}
+              unit={aqi.label}
+            />
+
             <WeatherCard
               title="Sunrise"
               value={formatTime(sunrise)}
@@ -149,13 +171,11 @@ function CurrentWeather() {
               dataKey="precipitation"
               title="Precipitation (mm)"
             />
-
             <WeatherChart
               data={chartData}
               dataKey="wind"
               title="Wind Speed (km/h)"
             />
-
             <WeatherChart
               data={chartData}
               dataKey="visibility"
