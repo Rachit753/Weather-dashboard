@@ -18,7 +18,6 @@ function HistoricalWeather() {
 
   useEffect(() => {
     if (latitude && longitude && startDate && endDate) {
-      
       if (endDate - startDate > 2 * 365 * 24 * 60 * 60 * 1000) {
         alert("Select range within 2 years");
         return;
@@ -62,6 +61,11 @@ function HistoricalWeather() {
     grouped[date].windDir.push(data.hourly.winddirection_10m[i]);
   });
 
+  const getDirection = (deg) => {
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.round(deg / 45) % 8];
+  };
+
   const chartData = Object.keys(grouped).map((date) => {
     const d = grouped[date];
 
@@ -84,8 +88,31 @@ function HistoricalWeather() {
       precipitation: d.precipitation,
       windMax,
       windDir: avgWindDir,
+      windDirection: getDirection(avgWindDir),
     };
   });
+
+  const toDecimal = (time) =>
+  new Date(time).getHours() +
+  new Date(time).getMinutes() / 60;
+
+const formatToTime = (time) =>
+  new Date(time).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const sunChartData =
+  data?.daily?.time?.map((date, i) => ({
+    date: new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+    }),
+    sunrise: toDecimal(data.daily.sunrise[i]),   
+    sunset: toDecimal(data.daily.sunset[i]),     
+    sunriseLabel: formatToTime(data.daily.sunrise[i]), 
+    sunsetLabel: formatToTime(data.daily.sunset[i]),   
+  })) || [];
 
   const airChartData =
     airData?.hourly?.time?.map((time, i) => ({
@@ -128,12 +155,18 @@ function HistoricalWeather() {
 
       {data && (
         <>
-  
           <WeatherChart
             data={chartData}
             dataKey={["max", "mean", "min"]}
             title="Temperature (Max / Mean / Min)"
             scale={30}
+          />
+
+          <WeatherChart
+            data={sunChartData}
+            dataKey={["sunrise", "sunset"]}
+            title="Sunrise & Sunset (IST)"
+            scale={140}
           />
 
           <WeatherChart
@@ -149,6 +182,19 @@ function HistoricalWeather() {
             title="Max Wind Speed"
             scale={30}
           />
+
+          <div className="bg-gray-800 p-4 rounded-xl text-white">
+            <p className="text-sm text-gray-400 mb-2">
+              Dominant Wind Direction
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {chartData.map((d, i) => (
+                <span key={i} className="bg-gray-700 px-2 py-1 rounded">
+                  {d.date}: {d.windDirection}
+                </span>
+              ))}
+            </div>
+          </div>
 
           {airData && (
             <WeatherChart

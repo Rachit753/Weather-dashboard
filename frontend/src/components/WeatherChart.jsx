@@ -49,7 +49,14 @@ function WeatherChart({ data, dataKey, title, scale = 80 }) {
                   border: "none",
                   color: "#fff",
                 }}
-                formatter={(value, name) => [`${value}`, name]}
+                formatter={(value, name, props) => {
+                  const labelKey = name + "Label";
+                  const formattedValue = props?.payload?.[labelKey];
+                  return [
+                    formattedValue ?? (typeof value === "number" ? value.toFixed(2) : value),
+                    name,
+                  ];
+                }}
               />
 
               <Legend />

@@ -29,7 +29,7 @@ export async function fetchAirQuality(lat, lon) {
 export async function fetchHistorical(lat, lon, start, end) {
   try {
     const res = await fetch(
-      `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&hourly=temperature_2m,relativehumidity_2m,precipitation,windspeed_10m,winddirection_10m&timezone=auto`
+      `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&daily=sunrise,sunset&hourly=temperature_2m,relativehumidity_2m,precipitation,windspeed_10m,winddirection_10m&timezone=auto`
     );
 
     return await res.json();
