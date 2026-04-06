@@ -6,6 +6,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Brush,
 } from "recharts";
 
 function WeatherChart({ data, dataKey, title, scale = 80 }) {
@@ -23,7 +24,7 @@ function WeatherChart({ data, dataKey, title, scale = 80 }) {
       : "time";
 
   return (
-    <div className="bg-gray-800 p-4 rounded-xl mt-6">
+    <div className="bg-gray-800/70 backdrop-blur-md p-4 rounded-xl mt-6">
       <h2 className="text-white mb-4">{title}</h2>
 
       <div className="w-full overflow-x-auto">
@@ -41,6 +42,13 @@ function WeatherChart({ data, dataKey, title, scale = 80 }) {
                 interval={Math.ceil(data.length / 10)}
               />
 
+              <Brush
+                dataKey={xKey}
+                height={10}
+                travellerWidth={3}
+                stroke="#3b82f6"
+              />
+
               <YAxis />
 
               <Tooltip
@@ -53,7 +61,10 @@ function WeatherChart({ data, dataKey, title, scale = 80 }) {
                   const labelKey = name + "Label";
                   const formattedValue = props?.payload?.[labelKey];
                   return [
-                    formattedValue ?? (typeof value === "number" ? value.toFixed(2) : value),
+                    formattedValue ??
+                      (typeof value === "number"
+                        ? value.toFixed(2)
+                        : value),
                     name,
                   ];
                 }}
@@ -69,10 +80,10 @@ function WeatherChart({ data, dataKey, title, scale = 80 }) {
                     dataKey={key}
                     stroke={
                       i === 0
-                        ? "#3b82f6" // blue
+                        ? "#3b82f6"
                         : i === 1
-                        ? "#10b981" // green
-                        : "#f59e0b" // yellow
+                        ? "#10b981"
+                        : "#f59e0b"
                     }
                     dot={false}
                   />

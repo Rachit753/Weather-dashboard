@@ -129,7 +129,7 @@ function CurrentWeather() {
               onChange={(date) => setSelectedDate(date)}
               minDate={new Date()}
               maxDate={new Date()}
-              className="p-2 rounded bg-gray-800 text-white"
+              className="p-2 rounded bg-gray-800/70 backdrop-blur-md text-white"
             />
           </div>
 
@@ -149,7 +149,7 @@ function CurrentWeather() {
               unit={`°${unit}`}
             />
 
-            <div className="bg-gray-800 p-4 rounded-xl">
+            <div className="bg-gray-800/70 backdrop-blur-md p-4 rounded-xl">
               <p className="text-gray-400 text-sm mb-2">
                 Temperature Range
               </p>

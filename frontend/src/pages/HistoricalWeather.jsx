@@ -183,7 +183,7 @@ const sunChartData =
             scale={30}
           />
 
-          <div className="bg-gray-800 p-4 rounded-xl text-white">
+          <div className="bg-gray-800/70 backdrop-blur-md p-4 rounded-xl text-white">
             <p className="text-sm text-gray-400 mb-2">
               Dominant Wind Direction
             </p>

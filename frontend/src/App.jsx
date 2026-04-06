@@ -5,13 +5,22 @@ import Navbar from "./components/Navbar";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<CurrentWeather />} />
-        <Route path="/historical" element={<HistoricalWeather />} />
-      </Routes>
-    </BrowserRouter>
+    <div
+      className="min-h-screen bg-cover bg-center"
+      style={{
+        backgroundImage: `url('/weather-bg.jpg')`,
+      }}
+    >
+      <div className="min-h-screen bg-black/70">
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<CurrentWeather />} />
+            <Route path="/historical" element={<HistoricalWeather />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </div>
   );
 }
 
