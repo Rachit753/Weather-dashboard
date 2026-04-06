@@ -15,8 +15,8 @@ export async function fetchWeather(lat, lon) {
 export async function fetchAirQuality(lat, lon) {
   try {
     const res = await fetch(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5`
-    );
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide`
+);
 
     const data = await res.json();
     return data;

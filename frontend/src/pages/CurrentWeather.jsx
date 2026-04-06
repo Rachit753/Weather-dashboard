@@ -45,6 +45,10 @@ function CurrentWeather() {
 
   const pm25 = airData?.hourly?.pm2_5?.[index];
 
+  const co = airData?.hourly?.carbon_monoxide?.[index];
+  const no2 = airData?.hourly?.nitrogen_dioxide?.[index];
+  const so2 = airData?.hourly?.sulphur_dioxide?.[index];
+
   const getAQI = (pm) => {
     if (pm == null) return { value: "--", label: "Unknown" };
 
@@ -107,7 +111,7 @@ function CurrentWeather() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             <WeatherCard
               title="Temperature"
               value={currentTemp?.toFixed(1)}
@@ -142,6 +146,10 @@ function CurrentWeather() {
               value={`${aqi.value}`}
               unit={aqi.label}
             />
+
+            <WeatherCard title="CO" value={co?.toFixed(1)} unit="μg/m³" />
+            <WeatherCard title="NO2" value={no2?.toFixed(1)} unit="μg/m³" />
+            <WeatherCard title="SO2" value={so2?.toFixed(1)} unit="μg/m³" />
 
             <WeatherCard
               title="Sunrise"
