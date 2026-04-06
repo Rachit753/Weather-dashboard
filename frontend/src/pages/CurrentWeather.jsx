@@ -22,6 +22,16 @@ function CurrentWeather() {
   const humidity = weather?.hourly?.relativehumidity_2m?.[0];
   const precipitation = weather?.hourly?.precipitation?.[0];
 
+  const windSpeed = weather?.hourly?.windspeed_10m?.[0];
+  const currentIndex = weather?.hourly?.time?.findIndex(
+  (t) => new Date(t).getHours() === new Date().getHours()
+);
+
+  const uvIndex =
+  currentIndex !== -1
+    ? weather?.hourly?.uv_index?.[currentIndex]
+    : 0;
+
   useEffect(() => {
     if (latitude && longitude) {
       fetchWeather(latitude, longitude).then(setWeather);
@@ -39,6 +49,8 @@ function CurrentWeather() {
       temperature: convertTemp(weather.hourly.temperature_2m[index]),
       humidity: weather.hourly.relativehumidity_2m[index],
       precipitation: weather.hourly.precipitation[index],
+      wind: weather.hourly.windspeed_10m[index],
+      visibility: weather.hourly.visibility[index],
     })) || [];
 
   const airChartData =
@@ -79,6 +91,8 @@ function CurrentWeather() {
             />
             <WeatherCard title="Humidity" value={humidity} unit="%" />
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
+            <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
+            <WeatherCard title="UV Index" value={uvIndex} unit="" />
           </div>
 
           <div className="space-y-8">
@@ -96,6 +110,18 @@ function CurrentWeather() {
               data={chartData}
               dataKey="precipitation"
               title="Precipitation (mm)"
+            />
+            
+            <WeatherChart
+              data={chartData}
+              dataKey="wind"
+              title="Wind Speed (km/h)"
+            />
+
+            <WeatherChart
+              data={chartData}
+              dataKey="visibility"
+              title="Visibility (m)"
             />
 
             {airData && (
