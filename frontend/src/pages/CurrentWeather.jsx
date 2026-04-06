@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import useLocation from "../hooks/useLocation";
-import { fetchWeather } from "../services/weatherApi";
+import { fetchWeather, fetchAirQuality } from "../services/weatherApi";
 import WeatherCard from "../components/WeatherCard";
 import WeatherChart from "../components/WeatherChart";
 
 function CurrentWeather() {
   const { latitude, longitude, error } = useLocation();
   const [weather, setWeather] = useState(null);
+  const [airData, setAirData] = useState(null);
 
   const [unit, setUnit] = useState("C");
 
@@ -23,10 +24,8 @@ function CurrentWeather() {
 
   useEffect(() => {
     if (latitude && longitude) {
-      fetchWeather(latitude, longitude).then((data) => {
-        console.log("Weather Data:", data);
-        setWeather(data);
-      });
+      fetchWeather(latitude, longitude).then(setWeather);
+      fetchAirQuality(latitude, longitude).then(setAirData);
     }
   }, [latitude, longitude]);
 
@@ -42,6 +41,17 @@ function CurrentWeather() {
       precipitation: weather.hourly.precipitation[index],
     })) || [];
 
+  const airChartData =
+    airData?.hourly?.time?.map((time, index) => ({
+      time: new Date(time).toLocaleString("en-IN", {
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      pm10: airData.hourly.pm10[index],
+      pm25: airData.hourly.pm2_5[index],
+    })) || [];
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-center mb-6">
@@ -52,7 +62,6 @@ function CurrentWeather() {
 
       {weather && (
         <>
-
           <div className="flex justify-end mb-4">
             <button
               onClick={() => setUnit(unit === "C" ? "F" : "C")}
@@ -88,6 +97,14 @@ function CurrentWeather() {
               dataKey="precipitation"
               title="Precipitation (mm)"
             />
+
+            {airData && (
+              <WeatherChart
+                data={airChartData}
+                dataKey={["pm10", "pm25"]}
+                title="PM10 & PM2.5"
+              />
+            )}
           </div>
         </>
       )}

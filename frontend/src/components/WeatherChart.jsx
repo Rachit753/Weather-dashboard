@@ -12,7 +12,6 @@ function WeatherChart({ data, dataKey, title }) {
     <div className="bg-gray-800 p-4 rounded-xl mt-6">
       <h2 className="text-white mb-4">{title}</h2>
 
-      {/* Horizontal Scroll + Controlled Width */}
       <div className="w-full overflow-x-auto">
         <div
           className="min-w-[800px]"
@@ -24,7 +23,6 @@ function WeatherChart({ data, dataKey, title }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
               
-              {/* Smart X-Axis (prevents clutter) */}
               <XAxis
                 dataKey="time"
                 interval={Math.ceil(data.length / 10)}
@@ -32,7 +30,6 @@ function WeatherChart({ data, dataKey, title }) {
 
               <YAxis />
 
-              {/* Improved Tooltip */}
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#1f2937",
@@ -41,12 +38,24 @@ function WeatherChart({ data, dataKey, title }) {
                 }}
               />
 
-              <Line
-                type="monotone"
-                dataKey={dataKey}
-                stroke="#3b82f6"
-                dot={false} 
-              />
+              {Array.isArray(dataKey) ? (
+                dataKey.map((key, i) => (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={i === 0 ? "#3b82f6" : "#10b981"}
+                    dot={false}
+                  />
+                ))
+              ) : (
+                <Line
+                  type="monotone"
+                  dataKey={dataKey}
+                  stroke="#3b82f6"
+                  dot={false}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
