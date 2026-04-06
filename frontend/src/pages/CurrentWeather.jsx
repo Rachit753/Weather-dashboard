@@ -32,6 +32,9 @@ function CurrentWeather() {
   const sunrise = weather?.daily?.sunrise?.[0];
   const sunset = weather?.daily?.sunset?.[0];
 
+  const tempMax = weather?.daily?.temperature_2m_max?.[0];
+  const tempMin = weather?.daily?.temperature_2m_min?.[0];
+
   const formatTime = (time) =>
     time
       ? new Date(time).toLocaleTimeString("en-IN", {
@@ -97,6 +100,23 @@ function CurrentWeather() {
               value={currentTemp?.toFixed(1)}
               unit={`°${unit}`}
             />
+            <div className="bg-gray-800 p-4 rounded-xl">
+              <p className="text-gray-400 text-sm mb-2">Temperature Range</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-400">Max</p>
+                  <p className="text-lg font-semibold">
+                    {convertTemp(tempMax)?.toFixed(1)}°{unit}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Min</p>
+                  <p className="text-lg font-semibold">
+                    {convertTemp(tempMin)?.toFixed(1)}°{unit}
+                  </p>
+                </div>
+              </div>
+            </div>
             <WeatherCard title="Humidity" value={humidity} unit="%" />
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
             <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
