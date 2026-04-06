@@ -18,19 +18,20 @@ function CurrentWeather() {
     return temp;
   };
 
-  const currentTemp = convertTemp(weather?.hourly?.temperature_2m?.[0]);
-  const humidity = weather?.hourly?.relativehumidity_2m?.[0];
-  const precipitation = weather?.hourly?.precipitation?.[0];
-
-  const windSpeed = weather?.hourly?.windspeed_10m?.[0];
   const currentIndex = weather?.hourly?.time?.findIndex(
   (t) => new Date(t).getHours() === new Date().getHours()
-);
+  );
+  const index = currentIndex !== -1 ? currentIndex : 0;
+  
+  const currentTemp = convertTemp( weather?.hourly?.temperature_2m?.[index]);
 
-  const uvIndex =
-  currentIndex !== -1
-    ? weather?.hourly?.uv_index?.[currentIndex]
-    : 0;
+  const humidity = weather?.hourly?.relativehumidity_2m?.[index];
+
+  const precipitation = weather?.hourly?.precipitation?.[index];
+
+  const windSpeed = weather?.hourly?.windspeed_10m?.[index];
+
+  const uvIndex = weather?.hourly?.uv_index?.[index];
 
   useEffect(() => {
     if (latitude && longitude) {
