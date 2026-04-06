@@ -25,3 +25,16 @@ export async function fetchAirQuality(lat, lon) {
     return null;
   }
 }
+
+export async function fetchHistorical(lat, lon, start, end) {
+  try {
+    const res = await fetch(
+      `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,windspeed_10m_max`
+    );
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}

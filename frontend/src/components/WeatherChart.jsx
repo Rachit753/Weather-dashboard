@@ -5,6 +5,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Legend, 
 } from "recharts";
 
 function WeatherChart({ data, dataKey, title }) {
@@ -24,7 +25,7 @@ function WeatherChart({ data, dataKey, title }) {
             <LineChart data={data}>
               
               <XAxis
-                dataKey="time"
+                dataKey={data[0]?.date ? "date" : "time"}
                 interval={Math.ceil(data.length / 10)}
               />
 
@@ -36,15 +37,17 @@ function WeatherChart({ data, dataKey, title }) {
                   border: "none",
                   color: "#fff",
                 }}
+                formatter={(value, name) => [`${value}°C`, name]}
               />
+
+              <Legend />
 
               {Array.isArray(dataKey) ? (
                 dataKey.map((key, i) => (
                   <Line
                     key={key}
                     type="monotone"
-                    dataKey={key}
-                    stroke={i === 0 ? "#3b82f6" : "#10b981"}
+                    dataKey={key} stroke={ i === 0 ? "#3b82f6" : i === 1 ? "#10b981" : "#f59e0b"} // ✅ Improved colors
                     dot={false}
                   />
                 ))
