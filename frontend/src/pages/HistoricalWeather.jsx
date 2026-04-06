@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
-import { fetchHistorical } from "../services/weatherApi";
+import {
+  fetchHistorical,
+  fetchHistoricalAir,
+} from "../services/weatherApi";
 import useLocation from "../hooks/useLocation";
 import WeatherChart from "../components/WeatherChart";
 
@@ -9,10 +12,13 @@ function HistoricalWeather() {
   const [endDate, setEndDate] = useState(null);
 
   const { latitude, longitude } = useLocation();
+
   const [data, setData] = useState(null);
+  const [airData, setAirData] = useState(null);
 
   useEffect(() => {
     if (latitude && longitude && startDate && endDate) {
+      
       if (endDate - startDate > 2 * 365 * 24 * 60 * 60 * 1000) {
         alert("Select range within 2 years");
         return;
@@ -26,18 +32,69 @@ function HistoricalWeather() {
         format(startDate),
         format(endDate)
       ).then(setData);
+
+      fetchHistoricalAir(
+        latitude,
+        longitude,
+        format(startDate),
+        format(endDate)
+      ).then(setAirData);
     }
   }, [latitude, longitude, startDate, endDate]);
 
-  const chartData =
-    data?.daily?.time?.map((time, i) => ({
+  const grouped = {};
+
+  data?.hourly?.time?.forEach((time, i) => {
+    const date = new Date(time).toISOString().split("T")[0];
+
+    if (!grouped[date]) {
+      grouped[date] = {
+        temps: [],
+        precipitation: 0,
+        wind: [],
+        windDir: [],
+      };
+    }
+
+    grouped[date].temps.push(data.hourly.temperature_2m[i]);
+    grouped[date].precipitation += data.hourly.precipitation[i];
+    grouped[date].wind.push(data.hourly.windspeed_10m[i]);
+    grouped[date].windDir.push(data.hourly.winddirection_10m[i]);
+  });
+
+  const chartData = Object.keys(grouped).map((date) => {
+    const d = grouped[date];
+
+    const max = Math.max(...d.temps);
+    const min = Math.min(...d.temps);
+    const mean = d.temps.reduce((a, b) => a + b, 0) / d.temps.length;
+
+    const windMax = Math.max(...d.wind);
+    const avgWindDir =
+      d.windDir.reduce((a, b) => a + b, 0) / d.windDir.length;
+
+    return {
+      date: new Date(date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
+      max,
+      min,
+      mean,
+      precipitation: d.precipitation,
+      windMax,
+      windDir: avgWindDir,
+    };
+  });
+
+  const airChartData =
+    airData?.hourly?.time?.map((time, i) => ({
       date: new Date(time).toLocaleDateString("en-IN", {
         day: "2-digit",
         month: "short",
       }),
-      max: data.daily.temperature_2m_max[i],
-      min: data.daily.temperature_2m_min[i],
-      mean: data.daily.temperature_2m_mean[i],
+      pm10: airData.hourly.pm10[i],
+      pm25: airData.hourly.pm2_5[i],
     })) || [];
 
   return (
@@ -47,7 +104,6 @@ function HistoricalWeather() {
       </h1>
 
       <div className="flex flex-col md:flex-row gap-4 justify-center mb-6">
-
         <DatePicker
           selected={startDate}
           onChange={(date) => setStartDate(date)}
@@ -66,16 +122,43 @@ function HistoricalWeather() {
         />
       </div>
 
-      <p className="text-gray-400 text-sm text-center mb-2">
-        Showing temperature trends between selected dates
+      <p className="text-gray-400 text-sm text-center mb-4">
+        Showing weather trends between selected dates
       </p>
 
       {data && (
-        <WeatherChart
-          data={chartData}
-          dataKey={["max", "min", "mean"]}
-          title="Temperature Trends"
-        />
+        <>
+  
+          <WeatherChart
+            data={chartData}
+            dataKey={["max", "mean", "min"]}
+            title="Temperature (Max / Mean / Min)"
+            scale={30}
+          />
+
+          <WeatherChart
+            data={chartData}
+            dataKey="precipitation"
+            title="Precipitation Total (mm)"
+            scale={30}
+          />
+
+          <WeatherChart
+            data={chartData}
+            dataKey="windMax"
+            title="Max Wind Speed"
+            scale={30}
+          />
+
+          {airData && (
+            <WeatherChart
+              data={airChartData}
+              dataKey={["pm10", "pm25"]}
+              title="PM10 & PM2.5 Trends"
+              scale={30}
+            />
+          )}
+        </>
       )}
     </div>
   );

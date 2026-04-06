@@ -6,7 +6,7 @@ import WeatherCard from "../components/WeatherCard";
 import WeatherChart from "../components/WeatherChart";
 
 function CurrentWeather() {
-  const { latitude, longitude, error } = useLocation();
+  const { latitude, longitude } = useLocation();
   const [weather, setWeather] = useState(null);
   const [airData, setAirData] = useState(null);
 
@@ -14,9 +14,7 @@ function CurrentWeather() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const convertTemp = (temp) => {
-    if (unit === "F") {
-      return (temp * 9) / 5 + 32;
-    }
+    if (unit === "F") return (temp * 9) / 5 + 32;
     return temp;
   };
 
@@ -46,7 +44,6 @@ function CurrentWeather() {
       : "--";
 
   const pm25 = airData?.hourly?.pm2_5?.[index];
-
   const co = airData?.hourly?.carbon_monoxide?.[index];
   const no2 = airData?.hourly?.nitrogen_dioxide?.[index];
   const so2 = airData?.hourly?.sulphur_dioxide?.[index];
@@ -56,7 +53,6 @@ function CurrentWeather() {
 
   const getAQI = (pm) => {
     if (pm == null) return { value: "--", label: "Unknown" };
-
     if (pm <= 12) return { value: pm, label: "Good" };
     if (pm <= 35) return { value: pm, label: "Moderate" };
     if (pm <= 55) return { value: pm, label: "Unhealthy" };
@@ -71,8 +67,6 @@ function CurrentWeather() {
       fetchAirQuality(latitude, longitude).then(setAirData);
     }
   }, [latitude, longitude]);
-
-  const selectedDateStr = selectedDate.toISOString().split("T")[0];
 
   const chartData =
     weather?.hourly?.time
@@ -89,18 +83,34 @@ function CurrentWeather() {
         visibility: weather.hourly.visibility[index],
         precipProb: weather.hourly.precipitation_probability[index],
       }))
-      .filter((item) => item.time.startsWith(selectedDateStr)) || [];
+      .filter((item) => {
+        const itemDate = new Date(item.time);
+        return (
+          itemDate.getDate() === selectedDate.getDate() &&
+          itemDate.getMonth() === selectedDate.getMonth() &&
+          itemDate.getFullYear() === selectedDate.getFullYear()
+        );
+      }) || [];
 
   const airChartData =
-    airData?.hourly?.time?.map((time, index) => ({
-      time: new Date(time).toLocaleString("en-IN", {
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      pm10: airData.hourly.pm10[index],
-      pm25: airData.hourly.pm2_5[index],
-    })) || [];
+    airData?.hourly?.time
+      ?.map((time, index) => ({
+        time,
+        formattedTime: new Date(time).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        pm10: airData.hourly.pm10[index],
+        pm25: airData.hourly.pm2_5[index],
+      }))
+      .filter((item) => {
+        const itemDate = new Date(item.time);
+        return (
+          itemDate.getDate() === selectedDate.getDate() &&
+          itemDate.getMonth() === selectedDate.getMonth() &&
+          itemDate.getFullYear() === selectedDate.getFullYear()
+        );
+      }) || [];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -112,6 +122,7 @@ function CurrentWeather() {
 
       {weather && (
         <>
+          
           <div className="flex justify-center mb-6">
             <DatePicker
               selected={selectedDate}
@@ -139,19 +150,17 @@ function CurrentWeather() {
             />
 
             <div className="bg-gray-800 p-4 rounded-xl">
-              <p className="text-gray-400 text-sm mb-2">Temperature Range</p>
-              <div className="flex justify-between items-center">
+              <p className="text-gray-400 text-sm mb-2">
+                Temperature Range
+              </p>
+              <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-gray-400">Max</p>
-                  <p className="text-lg font-semibold">
-                    {convertTemp(tempMax)?.toFixed(1)}°{unit}
-                  </p>
+                  <p>{convertTemp(tempMax)?.toFixed(1)}°{unit}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Min</p>
-                  <p className="text-lg font-semibold">
-                    {convertTemp(tempMin)?.toFixed(1)}°{unit}
-                  </p>
+                  <p>{convertTemp(tempMin)?.toFixed(1)}°{unit}</p>
                 </div>
               </div>
             </div>
@@ -160,73 +169,31 @@ function CurrentWeather() {
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
             <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
             <WeatherCard title="UV Index" value={uvIndex} unit="" />
+            <WeatherCard title="Rain Probability" value={precipitationProb} unit="%" />
 
-            <WeatherCard
-              title="Rain Probability"
-              value={precipitationProb}
-              unit="%"
-            />
-
-            <WeatherCard
-              title="Air Quality"
-              value={`${aqi.value}`}
-              unit={aqi.label}
-            />
-
+            <WeatherCard title="Air Quality" value={aqi.value} unit={aqi.label} />
             <WeatherCard title="CO" value={co?.toFixed(1)} unit="μg/m³" />
             <WeatherCard title="NO2" value={no2?.toFixed(1)} unit="μg/m³" />
             <WeatherCard title="SO2" value={so2?.toFixed(1)} unit="μg/m³" />
 
-            <WeatherCard
-              title="Sunrise"
-              value={formatTime(sunrise)}
-              unit=""
-            />
-            <WeatherCard
-              title="Sunset"
-              value={formatTime(sunset)}
-              unit=""
-            />
+            <WeatherCard title="Sunrise" value={formatTime(sunrise)} />
+            <WeatherCard title="Sunset" value={formatTime(sunset)} />
           </div>
 
           <div className="space-y-8">
-            <WeatherChart
-              data={chartData}
-              dataKey="temperature"
-              title={`Temperature (°${unit})`}
-            />
-            <WeatherChart
-              data={chartData}
-              dataKey="humidity"
-              title="Humidity (%)"
-            />
-            <WeatherChart
-              data={chartData}
-              dataKey="precipitation"
-              title="Precipitation (mm)"
-            />
-            <WeatherChart
-              data={chartData}
-              dataKey="wind"
-              title="Wind Speed (km/h)"
-            />
-            <WeatherChart
-              data={chartData}
-              dataKey="visibility"
-              title="Visibility (m)"
-            />
-
-            <WeatherChart
-              data={chartData}
-              dataKey="precipProb"
-              title="Precipitation Probability (%)"
-            />
+            <WeatherChart data={chartData} dataKey="temperature" title={`Temperature (°${unit})`} scale={60} />
+            <WeatherChart data={chartData} dataKey="humidity" title="Humidity (%)" scale={60}/>
+            <WeatherChart data={chartData} dataKey="precipitation" title="Precipitation (mm)" scale={60} />
+            <WeatherChart data={chartData} dataKey="wind" title="Wind Speed (km/h)" scale={60}/>
+            <WeatherChart data={chartData} dataKey="visibility" title="Visibility (m)" scale={60}/>
+            <WeatherChart data={chartData} dataKey="precipProb" title="Precipitation Probability (%)" scale={60}/>
 
             {airData && (
               <WeatherChart
                 data={airChartData}
                 dataKey={["pm10", "pm25"]}
                 title="PM10 & PM2.5"
+                scale={60}
               />
             )}
           </div>
