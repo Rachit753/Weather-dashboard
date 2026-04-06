@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
 import useLocation from "../hooks/useLocation";
 import { fetchWeather, fetchAirQuality } from "../services/weatherApi";
 import WeatherCard from "../components/WeatherCard";
@@ -10,6 +11,7 @@ function CurrentWeather() {
   const [airData, setAirData] = useState(null);
 
   const [unit, setUnit] = useState("C");
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const convertTemp = (temp) => {
     if (unit === "F") {
@@ -49,6 +51,9 @@ function CurrentWeather() {
   const no2 = airData?.hourly?.nitrogen_dioxide?.[index];
   const so2 = airData?.hourly?.sulphur_dioxide?.[index];
 
+  const precipitationProb =
+    weather?.hourly?.precipitation_probability?.[index];
+
   const getAQI = (pm) => {
     if (pm == null) return { value: "--", label: "Unknown" };
 
@@ -67,19 +72,24 @@ function CurrentWeather() {
     }
   }, [latitude, longitude]);
 
+  const selectedDateStr = selectedDate.toISOString().split("T")[0];
+
   const chartData =
-    weather?.hourly?.time?.map((time, index) => ({
-      time: new Date(time).toLocaleString("en-IN", {
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      temperature: convertTemp(weather.hourly.temperature_2m[index]),
-      humidity: weather.hourly.relativehumidity_2m[index],
-      precipitation: weather.hourly.precipitation[index],
-      wind: weather.hourly.windspeed_10m[index],
-      visibility: weather.hourly.visibility[index],
-    })) || [];
+    weather?.hourly?.time
+      ?.map((time, index) => ({
+        time,
+        formattedTime: new Date(time).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        temperature: convertTemp(weather.hourly.temperature_2m[index]),
+        humidity: weather.hourly.relativehumidity_2m[index],
+        precipitation: weather.hourly.precipitation[index],
+        wind: weather.hourly.windspeed_10m[index],
+        visibility: weather.hourly.visibility[index],
+        precipProb: weather.hourly.precipitation_probability[index],
+      }))
+      .filter((item) => item.time.startsWith(selectedDateStr)) || [];
 
   const airChartData =
     airData?.hourly?.time?.map((time, index) => ({
@@ -102,6 +112,16 @@ function CurrentWeather() {
 
       {weather && (
         <>
+          <div className="flex justify-center mb-6">
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              minDate={new Date()}
+              maxDate={new Date()}
+              className="p-2 rounded bg-gray-800 text-white"
+            />
+          </div>
+
           <div className="flex justify-end mb-4">
             <button
               onClick={() => setUnit(unit === "C" ? "F" : "C")}
@@ -140,6 +160,12 @@ function CurrentWeather() {
             <WeatherCard title="Precipitation" value={precipitation} unit="mm" />
             <WeatherCard title="Wind Speed" value={windSpeed} unit="km/h" />
             <WeatherCard title="UV Index" value={uvIndex} unit="" />
+
+            <WeatherCard
+              title="Rain Probability"
+              value={precipitationProb}
+              unit="%"
+            />
 
             <WeatherCard
               title="Air Quality"
@@ -188,6 +214,12 @@ function CurrentWeather() {
               data={chartData}
               dataKey="visibility"
               title="Visibility (m)"
+            />
+
+            <WeatherChart
+              data={chartData}
+              dataKey="precipProb"
+              title="Precipitation Probability (%)"
             />
 
             {airData && (

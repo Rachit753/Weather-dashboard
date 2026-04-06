@@ -25,7 +25,7 @@ function WeatherChart({ data, dataKey, title }) {
             <LineChart data={data}>
               
               <XAxis
-                dataKey={data[0]?.date ? "date" : "time"}
+                dataKey={data[0]?.formattedTime ? "formattedTime" : data[0]?.date ? "date" : "time"}
                 interval={Math.ceil(data.length / 10)}
               />
 
